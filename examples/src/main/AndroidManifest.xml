@@ -281,6 +281,10 @@
                 android:value=".CoreActivity" />
         </activity>
 
+        <activity android:name=".history.HistoryFilesActivity"
+            android:screenOrientation="portrait"
+            />
+
         <meta-data
             android:name="com.mapbox.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />

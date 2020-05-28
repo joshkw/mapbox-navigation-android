@@ -2,6 +2,7 @@ package com.mapbox.navigation.examples.core
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +32,7 @@ import com.mapbox.navigation.core.replay.history.ReplayEventBase
 import com.mapbox.navigation.core.replay.history.ReplayEventsObserver
 import com.mapbox.navigation.core.replay.history.ReplayHistoryMapper
 import com.mapbox.navigation.examples.R
+import com.mapbox.navigation.examples.history.HistoryFilesActivity
 import com.mapbox.navigation.examples.utils.Utils
 import com.mapbox.navigation.examples.utils.extensions.toPoint
 import com.mapbox.navigation.ui.camera.NavigationCamera
@@ -65,6 +67,11 @@ class ReplayHistoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_replay_history_layout)
         mapView.onCreate(savedInstanceState)
+
+        selectHistoryButton.setOnClickListener {
+            val activityIntent = Intent(this, HistoryFilesActivity::class.java)
+            startActivityForResult(activityIntent, 1)
+        }
 
         getNavigationAsync {
             navigationContext = it
@@ -103,6 +110,20 @@ class ReplayHistoryActivity : AppCompatActivity() {
                 mapboxReplay
             )
             callback(navigationContext)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        HistoryFilesActivity.selectedHistory?.let {
+            val replayHistoryMapper = ReplayHistoryMapper(Gson(), ReplayCustomEventMapper(), MapboxLogger)
+            val replayEvents = replayHistoryMapper.mapToReplayEvents(it)
+            navigationContext?.mapboxReplayer?.stop()
+            navigationContext?.mapboxReplayer?.clearEvents()
+            navigationContext?.mapboxReplayer?.pushEvents(replayEvents)
+            navigationContext?.mapboxReplayer?.seekTo(0.0)
+            navigationContext?.mapboxReplayer?.playFirstLocation()
         }
     }
 
