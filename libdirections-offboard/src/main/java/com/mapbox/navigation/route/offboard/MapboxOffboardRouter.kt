@@ -110,6 +110,7 @@ class MapboxOffboardRouter(
                 .accessToken(accessToken)
                 .requestId(route.routeOptions()?.requestUuid())
                 .legIndex(legIndex)
+                .baseUrl("https://cloudfront-staging.tilestream.net")
                 .interceptor {
                     val httpUrl = it.request().url()
                     val skuUrl =

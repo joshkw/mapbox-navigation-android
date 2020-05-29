@@ -30,7 +30,7 @@ internal class RouteRefreshController(
     private val routerRefreshTimer = MapboxTimer()
 
     init {
-        routerRefreshTimer.restartAfterMillis = TimeUnit.MINUTES.toMillis(5)
+        routerRefreshTimer.restartAfterMillis = TimeUnit.SECONDS.toMillis(35)
     }
 
     fun start(): Job {

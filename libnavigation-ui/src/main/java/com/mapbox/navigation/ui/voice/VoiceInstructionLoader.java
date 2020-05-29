@@ -96,6 +96,7 @@ public class VoiceInstructionLoader {
         .accessToken(accessToken)
         .language(language)
         .cache(cache)
+        .baseUrl("https://cloudfront-staging.tilestream.net")
         .interceptor(provideOfflineCacheInterceptor());
     }
   }

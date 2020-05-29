@@ -60,6 +60,7 @@ class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider, SkuT
     override fun obtainUrlWithSkuToken(resourceUrl: String, querySize: Int): String {
         return skuGenerator?.let { generator ->
             val skuToken = generator.generateToken()
+            println("DEBUG obtainUrlWithSkuToken skuToken=$skuToken")
             check(skuToken.isNotEmpty()) { throw IllegalStateException("skuToken cannot be empty") }
 
             when {
@@ -76,12 +77,17 @@ class MapboxNavigationAccounts private constructor() : UrlSkuTokenProvider, SkuT
      * Returns current SDK SKU token needed for API Routing Tiles.
      */
     @Synchronized
-    override fun obtainSkuToken(): String = skuGenerator?.generateToken() ?: EMPTY_SKU
+    override fun obtainSkuToken(): String {
+        val skuToken = skuGenerator?.generateToken() ?: EMPTY_SKU
+        println("DEBUG obtainSkuToken skuToken=$skuToken")
+        return skuToken
+    }
 
     internal fun initializeSku() {
         skuGenerator?.apply {
             initializeSKU()
-            generateToken()
+            val skuToken = generateToken()
+            println("DEBUG initializeSku skuToken=$skuToken")
         }
     }
 

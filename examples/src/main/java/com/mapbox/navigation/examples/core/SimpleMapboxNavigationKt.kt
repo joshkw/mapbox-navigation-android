@@ -38,6 +38,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions
 import com.mapbox.navigation.base.internal.extensions.applyDefaultParams
 import com.mapbox.navigation.base.internal.extensions.coordinates
 import com.mapbox.navigation.base.options.NavigationOptions
+import com.mapbox.navigation.base.options.OnboardRouterOptions
 import com.mapbox.navigation.base.trip.model.RouteProgress
 import com.mapbox.navigation.core.MapboxNavigation
 import com.mapbox.navigation.core.directions.session.RoutesObserver
@@ -58,16 +59,20 @@ import com.mapbox.navigation.ui.map.NavigationMapboxMap
 import com.mapbox.navigation.ui.voice.NavigationSpeechPlayer
 import com.mapbox.navigation.ui.voice.SpeechPlayerProvider
 import com.mapbox.navigation.ui.voice.VoiceInstructionLoader
-import java.io.File
-import java.lang.ref.WeakReference
-import java.util.Date
-import java.util.Locale
 import kotlinx.android.synthetic.main.activity_trip_service.mapView
-import kotlinx.android.synthetic.main.bottom_sheet_faster_route.*
-import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.*
+import kotlinx.android.synthetic.main.bottom_sheet_faster_route.acceptLayout
+import kotlinx.android.synthetic.main.bottom_sheet_faster_route.bottomSheetFasterRoute
+import kotlinx.android.synthetic.main.bottom_sheet_faster_route.dismissLayout
+import kotlinx.android.synthetic.main.bottom_sheet_faster_route.fasterRouteAcceptProgress
+import kotlinx.android.synthetic.main.content_simple_mapbox_navigation.startNavigation
 import kotlinx.coroutines.channels.Channel
 import okhttp3.Cache
 import timber.log.Timber
+import java.io.File
+import java.lang.ref.WeakReference
+import java.util.ArrayList
+import java.util.Date
+import java.util.Locale
 
 /**
  * This activity shows how to set up a basic turn-by-turn
@@ -96,6 +101,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var navigationMapboxMap: NavigationMapboxMap
     private lateinit var speechPlayer: NavigationSpeechPlayer
+    private lateinit var voiceInstructionLoader: VoiceInstructionLoader
     private val replayRouteLocationEngine = ReplayRouteLocationEngine()
 
     @SuppressLint("MissingPermission")
@@ -142,7 +148,15 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         val options =
             MapboxNavigation.defaultNavigationOptions(this, Utils.getMapboxAccessToken(this))
 
-        mapboxNavigation = getMapboxNavigation(options)
+        val updatedOptions = options.toBuilder()
+            .onboardRouterOptions(OnboardRouterOptions.Builder()
+                .tilesUri("https://cloudfront-staging.tilestream.net")
+                .tilesVersion("2020_02_02-03_00_00")
+                .internalFilePath(this)
+                .build())
+            .build()
+
+        mapboxNavigation = getMapboxNavigation(updatedOptions)
     }
 
     override fun onMapReady(mapboxMap: MapboxMap) {
@@ -204,7 +218,7 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private fun initializeSpeechPlayer() {
         val cache = Cache(File(application.cacheDir, VOICE_INSTRUCTION_CACHE), 10 * 1024 * 1024)
-        val voiceInstructionLoader =
+        voiceInstructionLoader =
             VoiceInstructionLoader(application, Mapbox.getAccessToken(), cache)
         val speechPlayerProvider =
             SpeechPlayerProvider(application, Locale.US.language, true, voiceInstructionLoader)
@@ -218,6 +232,11 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
         fasterRouteAcceptProgress.max = maxProgress.toInt()
         startNavigation.setOnClickListener {
             updateCameraOnNavigationStateChange(true)
+            val voiceInstructionsToCache: MutableList<String> = ArrayList()
+            for (i in 0 until 5) {
+                voiceInstructionsToCache.add(mapboxNavigation.retrieveSsmlAnnouncementInstruction(i) ?: "")
+            }
+            voiceInstructionLoader.cacheInstructions(voiceInstructionsToCache)
             mapboxNavigation.registerVoiceInstructionsObserver(this)
             mapboxNavigation.startTripSession()
             val routes = mapboxNavigation.getRoutes()
@@ -298,11 +317,12 @@ class SimpleMapboxNavigationKt : AppCompatActivity(), OnMapReadyCallback,
 
     private val fasterRouteObserver = object : FasterRouteObserver {
         override fun onFasterRoute(currentRoute: DirectionsRoute, alternatives: List<DirectionsRoute>, isAlternativeFaster: Boolean) {
-            if (isAlternativeFaster) {
+//            if (isAlternativeFaster) {
                 this@SimpleMapboxNavigationKt.fasterRoutes = alternatives
-                fasterRouteSelectionTimer.start()
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            }
+                mapboxNavigation.setRoutes(alternatives)
+//                fasterRouteSelectionTimer.start()
+//                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+//            }
         }
     }
 

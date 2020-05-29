@@ -26,6 +26,6 @@ interface FasterRouteObserver {
         /**
          * The default and recommended interval for checking for faster routes.
          */
-        val DEFAULT_INTERVAL_MILLIS = TimeUnit.MINUTES.toMillis(5)
+        val DEFAULT_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(30)
     }
 }

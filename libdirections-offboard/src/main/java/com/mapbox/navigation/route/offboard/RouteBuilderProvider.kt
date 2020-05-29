@@ -28,6 +28,7 @@ internal object RouteBuilderProvider {
             .voiceInstructions(true)
             .bannerInstructions(true)
             .voiceUnits(context.inferDeviceLocale().getUnitTypeForLocale())
+            .baseUrl("https://cloudfront-staging.tilestream.net")
             .interceptor {
                 val httpUrl = it.request().url()
                 val skuUrl =

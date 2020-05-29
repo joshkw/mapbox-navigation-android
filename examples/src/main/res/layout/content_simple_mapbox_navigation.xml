@@ -16,7 +16,9 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:mapbox_apiBaseUri="https://cloudfront-staging.tilestream.net"
+        >
 
         <Button
             android:id="@+id/btn_send_user_feedback"

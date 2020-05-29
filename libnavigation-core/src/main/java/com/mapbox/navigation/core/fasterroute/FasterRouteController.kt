@@ -27,9 +27,9 @@ internal class FasterRouteController(
         this.fasterRouteObserver = fasterRouteObserver
         if (previousFasterRouteObserver == null) {
             val restartAfterMillis = fasterRouteObserver.restartAfterMillis()
-            check(TimeUnit.MILLISECONDS.toMinutes(restartAfterMillis) >= 2) {
-                "Faster route should be >= 2 minutes, $restartAfterMillis is out of range"
-            }
+//            check(TimeUnit.MILLISECONDS.toMinutes(restartAfterMillis) >= 2) {
+//                "Faster route should be >= 2 minutes, $restartAfterMillis is out of range"
+//            }
             fasterRouteTimer.restartAfterMillis = restartAfterMillis
             fasterRouteTimer.startTimer {
                 requestFasterRoute()
