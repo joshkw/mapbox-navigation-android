@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 internal class MapRouteProgressChangeListener(
     private val routeLine: MapRouteLine,
     private val routeArrow: MapRouteArrow,
-    private val vanishRouteLineEnabled: Boolean
+    var vanishRouteLineEnabled: Boolean
 ) : RouteProgressObserver {
 
     /**
